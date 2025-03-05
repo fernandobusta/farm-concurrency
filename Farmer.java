@@ -1,6 +1,4 @@
-import java.util.*;
-import java.util.concurrent.*;
-
+import java.util.Map;
 
 public class Farmer implements Runnable {
 
@@ -62,21 +60,24 @@ public class Farmer implements Runnable {
 
     private void travelToField(String field, int numberOfAnimalsCarried) throws InterruptedException {
         // Simulate the tick cost of walking from enclosure or field to the next field
-        System.out.println("Travelling to field " + field.getName() + " -> Add ticks here");
+        System.out.println("Travelling to field " + field + " -> Add ticks here");
     }
 
     private void AddAnimalToField(Field field, int numberOfAnimal) throws InterruptedException {
         // Add animals to the given field
-        field.lock(); // Lock the field so that no buyer can access it at the same time
+        field.lockField(); // Lock the field so that no buyer can access it at the same time
         try {
             int previousAnimalCount = field.getAnimalCount();
             int newAnimalCount = previousAnimalCount + numberOfAnimal;
             field.setAnimalCount(newAnimalCount);
+
+            // Signal to waiting buyers that field is no longer empty
+            field.signalBuyers();
             
             System.out.println("Added " + numberOfAnimal + " to " + field.getName());
 
         } finally {
-            field.unlock();
+            field.unlockField();
         }
 
     }
