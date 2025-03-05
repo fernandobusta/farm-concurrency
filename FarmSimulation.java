@@ -27,13 +27,20 @@ public class FarmSimulation {
 
         // Create the farmer
         Farmer singleFarmer = new Farmer("Farmer-01", enclosure, fieldsMap);
-        Thread farmerThread = new Thread(singleFarmer, "Farmer-Thread-01");
+        Thread farmerThread = new Thread(singleFarmer, "Farmer-Thread");
 
-        // Add Delivery
-        // Add Buyer
+        // Create the Delivery
+        Delivery delivery = new Delivery(enclosure);
+        Thread deliveryThread = new Thread(delivery, "Delivery-Thread");
+
+        // Create the Buyer
+        Buyer buyer = new Buyer(fieldsMap);
+        Thread buyerThread = new Thread(buyer, "Buyer-Thread");
 
         // Start all threads
         farmerThread.start();
+        deliveryThread.start();
+        buyerThread.start();
         
 
         /** The current thread (FarmSimualtion main) will sleep while the other threads
@@ -48,6 +55,8 @@ public class FarmSimulation {
 
         // Stop all threads
         farmerThread.interrupt();
+        deliveryThread.interrupt();
+        buyerThread.interrupt();
 
         /** Ensure the main thread waits for te worker threads to fully shut down before
          * proceeding
