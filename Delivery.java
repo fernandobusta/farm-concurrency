@@ -1,8 +1,8 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.Random;
-import java.util.Collections;
 
 public class Delivery implements Runnable {
 
@@ -28,7 +28,7 @@ public class Delivery implements Runnable {
                 Map<String, Integer> newDelivery = createRandomDelivery(10);
 
                 // Place them in the enclosure
-                enclosure.addAnimals(newDelivery);
+                enclosure.storeFromDelivery(newDelivery);
 
                 System.out.println("Delivery: " + newDelivery + " arrived after " + randomTicks + " ticks.");
                 
@@ -51,11 +51,11 @@ public class Delivery implements Runnable {
         animals.add("sheep");
         animals.add("llamas");
         animals.add("chickens");
+        Collections.shuffle(animals);
 
         Map<String, Integer> newDelivery = new HashMap<>();
 
         int spaceLeft = totalAnimals;
-
         for (int i = 0; i < animals.size(); i++) {
             // If there is no space left, break
             if (spaceLeft == 0) {

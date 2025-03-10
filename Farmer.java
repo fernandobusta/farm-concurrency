@@ -52,7 +52,7 @@ public class Farmer implements Runnable {
 
             // Place the animals into the field
             Field field = fields.get(animal); // get the field from map
-            AddAnimalToField(field, quantity);
+            addAnimalToField(field, quantity);
 
 
         }
@@ -63,7 +63,7 @@ public class Farmer implements Runnable {
         System.out.println("Travelling to field " + field + " -> Add ticks here");
     }
 
-    private void AddAnimalToField(Field field, int numberOfAnimal) throws InterruptedException {
+    private void addAnimalToField(Field field, int numberOfAnimal) throws InterruptedException {
         // Add animals to the given field
         field.lockField(); // Lock the field so that no buyer can access it at the same time
         try {

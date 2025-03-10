@@ -33,8 +33,8 @@ public class FarmSimulation {
         Delivery delivery = new Delivery(enclosure);
         Thread deliveryThread = new Thread(delivery, "Delivery-Thread");
 
-        // Create the Buyer
-        Buyer buyer = new Buyer(fieldsMap);
+        // Create the Buyer -> TODO: for loop here
+        Buyer buyer = new Buyer(1, enclosure, fieldsMap);
         Thread buyerThread = new Thread(buyer, "Buyer-Thread");
 
         // Start all threads
@@ -63,6 +63,8 @@ public class FarmSimulation {
          */
         try {
             farmerThread.join();
+            deliveryThread.join();
+            buyerThread.join();
             // And rest of the threads here...
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -7,6 +9,7 @@ public class Field {
     // or sempahores already implemented
     private final String name;
     private int animalCount;
+    private final List<Buyer> buyerQueue = new ArrayList<>();
 
     private final Lock lock = new ReentrantLock(true);
     private final Condition notEmpty = lock.newCondition(); // condition to wait if empty
@@ -25,6 +28,10 @@ public class Field {
 
     public void setAnimalCount(int newAnimalCount) {
         this.animalCount = newAnimalCount;
+    }
+
+    public void addBuyerToQueue(Buyer buyer) {
+        this.buyerQueue.add(buyer);
     }
 
     // ------------------------------------------------------------------------
