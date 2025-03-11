@@ -8,20 +8,22 @@ public class Buyer implements Runnable {
     private final Map<String, Field> fields;
     private final Enclosure enclosure;
     private final Random rand;
+    private final TickSystem tickSystem; // ✅ Store tick system
 
 
-    public Buyer(int buyerId, Enclosure enclosure, Map<String, Field> fields) {
+    public Buyer(int buyerId, Enclosure enclosure, Map<String, Field> fields, TickSystem tickSystem) {
         this.buyerId = buyerId;
         this.fields = fields;
         this.enclosure = enclosure;
         this.rand = new Random();
+        this.tickSystem = tickSystem; // ✅ Assign tick system
     }
 
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep((int) (Math.random() * 5000) + 2000); // Random delay before buying
+                tickSystem.waitForNextTick(); // 🚀 Wait for tick before buying
                 buyRandomAnimal();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -31,30 +33,33 @@ public class Buyer implements Runnable {
 
     // Try to buy a random animal from a field
     private void buyRandomAnimal() throws InterruptedException {
-        // Pick a random field from map
         List<String> keys = new ArrayList<>(fields.keySet());
         String animal = keys.get(rand.nextInt(keys.size()));
         Field field = fields.get(animal);
-
-        removeAnimalFromField(field, 1);
+    
+        // ✅ Buyer just waits if the field is empty (NO LOCK)
+        while (field.getAnimalCount() == 0) { 
+            System.out.println("⏳ Buyer " + buyerId + " is waiting for " + field.getName() + " to be stocked...");
+            field.awaitStock(); // 🚀 Wait for Farmer to notify
+        }
+    
+        removeAnimalFromField(field, 1); // ✅ Lock only when modifying
     }
-
-    private void removeAnimalFromField(Field field, int numberofAnimal) throws InterruptedException {
-        // Remove (buy) animal from give field
-        field.lockField();
+    
+    private void removeAnimalFromField(Field field, int numberOfAnimals) throws InterruptedException {
+        field.lockField(); // 🔒 Lock only when modifying
         try {
-            int previousAnimalCount = field.getAnimalCount();
-            if (previousAnimalCount == 0) {
-                // release the lock and wait until a stock signal has been received
-            }
-            int newAnimalCount = previousAnimalCount - numberofAnimal;
-            field.setAnimalCount(newAnimalCount);
-
-            // Singal to Buyers or farmers ?????
-            field.signalBuyers();
-            System.out.println(this.buyerId + " bought " + numberofAnimal + " " + field.getName());
+            int previousCount = field.getAnimalCount();
+            if (previousCount == 0) return; // 🚨 Double-check to avoid race conditions
+    
+            field.setAnimalCount(previousCount - numberOfAnimals);
+            System.out.println("🛒 Buyer " + buyerId + " bought " + numberOfAnimals + " " + field.getName());
+    
         } finally {
-            field.unlockField();
+            field.unlockField(); // 🔓 Unlock after modifying
         }
     }
+    
+
+    
 }

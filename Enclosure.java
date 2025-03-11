@@ -11,7 +11,8 @@ public class Enclosure {
             int count = entry.getValue();
             animals.put(type, animals.getOrDefault(type, 0) + count);
         }
-        System.out.println("Stored from delivery: " + animals);
+        System.out.println("✅ Enclosure updated: " + animals);
+        notifyAll(); // 🚀 Wake up the Farmer!
     }
 
     // Subtract animals when taken by a farmer
@@ -27,27 +28,35 @@ public class Enclosure {
     }
 
     // Farmer loads animals into their trailer (up to capacity)
-    public synchronized Map<String, Integer> loadAnimalsIntoTrailer(int capacity) {
+    public synchronized Map<String, Integer> loadAnimalsIntoTrailer(int capacity) throws InterruptedException {
+        while (animals.isEmpty()) { // 🚨 Wait if no animals are in the enclosure
+            System.out.println("⏳ Farmer is waiting for animals...");
+            wait(); // Farmer will sleep until Delivery notifies
+        }
+    
         Map<String, Integer> takenAnimals = new HashMap<>();
         List<String> availableTypes = new ArrayList<>(animals.keySet());
-
+    
         int spaceLeft = capacity;
-
+    
         while (spaceLeft > 0 && !availableTypes.isEmpty()) {
             String type = availableTypes.get(random.nextInt(availableTypes.size())); // Pick a random animal type
             int maxTake = Math.min(spaceLeft, animals.getOrDefault(type, 0)); // Max we can take
+    
             if (maxTake > 0) {
                 int numToTake = random.nextInt(maxTake) + 1; // Take 1 to maxTake
                 takenAnimals.put(type, numToTake);
                 subtractAnimals(type, numToTake);
                 spaceLeft -= numToTake;
             } 
-            availableTypes.remove(type); // Remove from selection after attempting
+    
+            availableTypes.remove(type);
         }
-
-        System.out.println("Farmer loaded animals into trailer: " + takenAnimals);
+    
+        System.out.println("🚜 Farmer received animals: " + takenAnimals);
         return takenAnimals;
     }
+    
 
     // Get current animal counts (for debugging/logging)
     public synchronized Map<String, Integer> getAnimals() {
