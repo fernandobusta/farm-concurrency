@@ -18,29 +18,25 @@ public class Farmer implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                tickSystem.waitForNextTick();
-                // Take 10 animals from enclosure
-                Map<String, Integer> currentAnimals = enclosure.loadAnimalsIntoTrailer(10);
-                
-                // If no animals were taken, maybe enclosure is empty: Wait
-                if (currentAnimals.isEmpty()) {
-                    Thread.sleep(50); // Sleep for a bit before checking
-                    continue;
-                }
+                tickSystem.waitForNextTick(); // ⏳ Wait before acting
+    
+                // ✅ Enclosure handles waiting, no need for extra check in Farmer
+                Map<String, Integer> trailerAnimals = enclosure.loadAnimalsIntoTrailer(10);
 
-                // Take the animals to their respective fields
-                stockAnimals(currentAnimals);
-
-                // Return to enclosure, assuming no leftover animals
-                travelBackToEnclosure(0);
-
+    
+                System.out.println(tickSystem.getCurrentTick() + " Farmer-Thread 🚜 Received animals: " + trailerAnimals);
+    
+                stockAnimals(trailerAnimals); // ✅ Move and stock all animals
+    
+                travelBackToEnclosure(0); // ✅ Return to the enclosure
+    
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             }
         }
-
     }
+    
 
     private void stockAnimals(Map<String, Integer> animalsToField) throws InterruptedException {
         // Perform the entire sequence fo travel and stock in fields of the animals

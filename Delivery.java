@@ -42,25 +42,20 @@ public class Delivery implements Runnable {
     private Map<String, Integer> createRandomDelivery(int totalAnimals) {
         ArrayList<String> animals = new ArrayList<>(List.of("pigs", "cows", "sheep", "llamas", "chicken"));
         Collections.shuffle(animals);
-
+    
         Map<String, Integer> newDelivery = new HashMap<>();
         int spaceLeft = totalAnimals;
-
-        for (String animal : animals) {
-            if (spaceLeft == 0) break; // No more space left
-
-            int newEntrySize = 1 + rand.nextInt(Math.min(spaceLeft, 3)); // Ensure at least 1
-            newDelivery.put(animal, newEntrySize);
+    
+        for (int i = 0; i < animals.size(); i++) {
+            if (spaceLeft == 0) break; // Stop when all animals are assigned
+    
+            int maxAllocation = Math.min(spaceLeft, 3); // Max 3 per type
+            int newEntrySize = (i == animals.size() - 1) ? spaceLeft : 1 + rand.nextInt(maxAllocation); // Last type gets all remaining space
+            newDelivery.put(animals.get(i), newEntrySize);
             spaceLeft -= newEntrySize;
         }
-
-        // **🚨 Ensure at least one animal is delivered** (if still empty)
-        if (newDelivery.isEmpty()) {
-            newDelivery.put("pigs", 1);
-        }
-
-        System.out.println("🔹 Generated delivery: " + newDelivery); // Debugging output
-
+    
+        System.out.println("🔹 Generated delivery: " + newDelivery + " (Total: " + totalAnimals + ")");
         return newDelivery;
     }
 

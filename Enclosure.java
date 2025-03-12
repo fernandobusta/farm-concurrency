@@ -4,6 +4,11 @@ public class Enclosure {
     private final Map<String, Integer> animals = new HashMap<>();
     private final Random random = new Random();
 
+
+    public synchronized boolean isActuallyEmpty() {
+        return animals.values().stream().allMatch(count -> count == 0);
+    }
+
     // Store animals from a delivery
     public synchronized void storeFromDelivery(Map<String, Integer> delivery) {
         for (Map.Entry<String, Integer> entry : delivery.entrySet()) {
@@ -29,9 +34,11 @@ public class Enclosure {
 
     // Farmer loads animals into their trailer (up to capacity)
     public synchronized Map<String, Integer> loadAnimalsIntoTrailer(int capacity) throws InterruptedException {
-        while (animals.isEmpty()) { // 🚨 Wait if no animals are in the enclosure
+        System.out.println("🚜 Farmer has arrived at enclosure");
+        System.out.println("🚜 Enclosure has: " + animals + " | Empty? " + animals.isEmpty());
+        while (isActuallyEmpty()) { // 🚨 Wait if all animal counts are 0
             System.out.println("⏳ Farmer is waiting for animals...");
-            wait(); // Farmer will sleep until Delivery notifies
+            wait(); // ✅ Farmer will sleep until Delivery notifies
         }
     
         Map<String, Integer> takenAnimals = new HashMap<>();
