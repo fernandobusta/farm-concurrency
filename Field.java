@@ -34,6 +34,16 @@ public class Field {
         this.buyerQueue.add(buyer);
     }
 
+    public synchronized void awaitStock() throws InterruptedException {
+        while (animalCount == 0) { // 🚨 Wait if no animals in the field
+            System.out.println("⏳ Buyer is waiting for " + name + " to be stocked...");
+            wait(); // 🚀 Waits until the Farmer calls `notifyAll()`
+        }
+    }
+    
+    
+    
+
     // ------------------------------------------------------------------------
     // Lock/Unlock Exposed methods
     // ------------------------------------------------------------------------
@@ -44,7 +54,10 @@ public class Field {
     public void unlockField() {
         lock.unlock();
     }
-    public void signalBuyers() {
-        notEmpty.signal();
+    public synchronized void signalBuyers() {
+        System.out.println("🚀 Notifying Buyers that " + name + " is stocked");
+        notifyAll(); // 🚀 Wake up all waiting Buyers!
     }
+    
+    
 }

@@ -5,39 +5,38 @@ public class Farmer implements Runnable {
     private final Enclosure enclosure;
     private final Map<String, Field> fields;
     private final String farmerName;
+    private final TickSystem tickSystem; // ✅ Store tick system
 
-    public Farmer(String farmerName, Enclosure enclosure, Map<String, Field> fields) {
+    public Farmer(String farmerName, Enclosure enclosure, Map<String, Field> fields, TickSystem tickSystem) {
         this.farmerName = farmerName;
         this.enclosure = enclosure;
         this.fields = fields;
+        this.tickSystem = tickSystem; // ✅ Assign tick system
     }
 
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                // Take 10 animals from enclosure
-                Map<String, Integer> currentAnimals = enclosure.loadAnimalsIntoTrailer(10);
-                
-                // If no animals were taken, maybe enclosure is empty: Wait
-                if (currentAnimals.isEmpty()) {
-                    Thread.sleep(50); // Sleep for a bit before checking
-                    continue;
-                }
+                tickSystem.waitForNextTick(); // ⏳ Wait before acting
+    
+                // ✅ Enclosure handles waiting, no need for extra check in Farmer
+                Map<String, Integer> trailerAnimals = enclosure.loadAnimalsIntoTrailer(10);
 
-                // Take the animals to their respective fields
-                stockAnimals(currentAnimals);
-
-                // Return to enclosure, assuming no leftover animals
-                travelBackToEnclosure(0);
-
+    
+                System.out.println(tickSystem.getCurrentTick() + " Farmer-Thread 🚜 Received animals: " + trailerAnimals);
+    
+                stockAnimals(trailerAnimals); // ✅ Move and stock all animals
+    
+                travelBackToEnclosure(0); // ✅ Return to the enclosure
+    
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             }
         }
-
     }
+    
 
     private void stockAnimals(Map<String, Integer> animalsToField) throws InterruptedException {
         // Perform the entire sequence fo travel and stock in fields of the animals
@@ -59,28 +58,32 @@ public class Farmer implements Runnable {
     }
 
     private void travelToField(String field, int numberOfAnimalsCarried) throws InterruptedException {
-        // Simulate the tick cost of walking from enclosure or field to the next field
-        System.out.println("Travelling to field " + field + " -> Add ticks here");
+        int travelTime = 10 + numberOfAnimalsCarried; // ✅ 10 ticks + 1 per animal carried
+    
+        System.out.println(tickSystem.getCurrentTick() + " Farmer-Thread 🚶 Carrying " 
+            + numberOfAnimalsCarried + " " + field + " (Travel Time: " + travelTime + " ticks)");
+    
+        // Simulate travel time by waiting for each tick
+        for (int i = 0; i < travelTime; i++) {
+            tickSystem.waitForNextTick(); // ⏳ Simulate travel ticks
+        }
+    
+        System.out.println(tickSystem.getCurrentTick() + " Farmer-Thread 🚜 Arrived at " + field);
     }
+    
 
-    private void addAnimalToField(Field field, int numberOfAnimal) throws InterruptedException {
-        // Add animals to the given field
-        field.lockField(); // Lock the field so that no buyer can access it at the same time
+    private void addAnimalToField(Field field, int numberOfAnimals) throws InterruptedException {
+        field.lockField();
         try {
-            int previousAnimalCount = field.getAnimalCount();
-            int newAnimalCount = previousAnimalCount + numberOfAnimal;
-            field.setAnimalCount(newAnimalCount);
-
-            // Signal to waiting buyers that field is no longer empty
-            field.signalBuyers();
-            
-            System.out.println("Added " + numberOfAnimal + " to " + field.getName());
-
+            field.setAnimalCount(field.getAnimalCount() + numberOfAnimals);
+            System.out.println("✅ Farmer stocked " + numberOfAnimals + " " + field.getName());
+            field.signalBuyers(); // 🚀 Notify Buyers that stock is available
         } finally {
             field.unlockField();
         }
-
     }
+    
+    
 
     private void travelBackToEnclosure(int leftoverAnimals) throws InterruptedException {
         System.out.println("Going back to enclosure -> add ticks");
