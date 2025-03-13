@@ -24,6 +24,13 @@ public class TickSystem {
         }
     }
 
+    // Wait for a specific number of ticks
+    public synchronized void waitForNTicks(int ticks) throws InterruptedException {
+        for (int i=0; i < ticks; i++) {
+            waitForNextTick();
+        }
+    }
+
     private synchronized void nextTick() {
         currentTick = (currentTick + 1) % totalTicks; // Reset to 0 after a full day
         System.out.println("⏳ Tick " + currentTick);

@@ -46,7 +46,7 @@ public class Field {
             int spaceLeft = capacity - count;
             int added = Math.min(spaceLeft, numberToAdd);
             count += added;
-
+            System.out.println("🌾 " + name + " field has: " + count);
             // Signal that the field is not empty anymore (buyers can proceed)
             notEmpty.signalAll();
 
