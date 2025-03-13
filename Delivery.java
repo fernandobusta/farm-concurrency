@@ -1,5 +1,4 @@
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Delivery implements Runnable {
     private final Enclosure enclosure;
@@ -68,7 +67,5 @@ public class Delivery implements Runnable {
         System.out.println("🔹 Generated delivery: " + newDelivery + " (Total: " + totalAnimals + ")");
         return newDelivery;
     }
-
-
 
 }
