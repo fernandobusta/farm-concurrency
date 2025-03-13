@@ -51,8 +51,8 @@ public class Enclosure {
     public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerName) throws InterruptedException {
         lock.lock();
         try {
-            System.out.println("🚜 Farmer " + farmerName + " has arrived at enclosure");
-            System.out.println("🚜 Enclosure has: " + animals);
+            System.out.println("🚜 " + farmerName + " has arrived at enclosure");
+            System.out.println("🏠 Enclosure has: " + animals);
             while (hasNoAnimals()) { // Wait if all animal counts are 0
                 System.out.println("⏳ Farmer " + farmerName + " is waiting for animals...");
                 notEmpty.await();
@@ -71,7 +71,6 @@ public class Enclosure {
                 spaceLeft -= numToTake;
                 availableTypes.remove(type);
             }
-            System.out.println("🚜 Farmer received animals: " + loadedAnimals);
             subtractAnimals(loadedAnimals); // Subtract loaded animals from enclosure
             return loadedAnimals;
         } finally {
