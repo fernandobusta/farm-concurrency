@@ -6,7 +6,7 @@ public class Farmer implements Runnable {
     private final Enclosure enclosure;
     private final Map<String, Field> fields;
     private final String farmerName;
-    private final TickSystem tickSystem; // Store tick system
+    private final TickSystem tickSystem;
     private Map<String, Integer> trailer;
     
     // Colours
@@ -18,7 +18,7 @@ public class Farmer implements Runnable {
         this.farmerName = farmerName;
         this.enclosure = enclosure;
         this.fields = fields;
-        this.tickSystem = tickSystem; // Assign tick system
+        this.tickSystem = tickSystem;
     }
 
     @Override
@@ -64,8 +64,10 @@ public class Farmer implements Runnable {
             int actuallyStocked = field.stock(quantity); // We won't worry about capacity atm
             System.out.println(ANSI_YELLOW + "✅ " + farmerName + " stocked " + actuallyStocked + " " + field.getName() + ANSI_RESET);
             
+            int leftToStock = quantity - actuallyStocked;
+
             // Eliminate animals from map
-            entry.setValue(0); // Assuming we stocked all of them (no capacity)
+            entry.setValue(leftToStock); // Assuming we stocked all of them (no capacity)
         }
     }
 
