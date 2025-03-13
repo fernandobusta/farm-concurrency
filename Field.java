@@ -11,14 +11,16 @@ public class Field {
     private int count;
     private final int capacity = 10;
     private final List<Buyer> buyerQueue = new ArrayList<>();
+    private final TickSystem tickSystem; // Store tick system
 
     private final Lock lock = new ReentrantLock(true);
     private final Condition notEmpty = lock.newCondition(); // condition to wait if empty
     private final Condition notFull = lock.newCondition();
 
-    public Field(String name, int initialAnimalCount) {
+    public Field(String name, int initialAnimalCount, TickSystem tickSystem) {
         this.name = name;
         this.count = initialAnimalCount;
+        this.tickSystem = tickSystem;
     }
 
     public String getName() {
@@ -47,6 +49,7 @@ public class Field {
             int added = Math.min(spaceLeft, numberToAdd);
             count += added;
             System.out.println("🌾 " + name + " count after stocking: " + count);
+
             // Signal that the field is not empty anymore (buyers can proceed)
             notEmpty.signalAll();
 
@@ -56,7 +59,7 @@ public class Field {
         }
     }
 
-    public void buyOne(String buyerName, TickSystem tickSystem) throws InterruptedException {
+    public void buyOne(String buyerName) throws InterruptedException {
         lock.lock();
         try {
             while (count == 0){

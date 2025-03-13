@@ -6,7 +6,7 @@ public class Farmer implements Runnable {
     private final Enclosure enclosure;
     private final Map<String, Field> fields;
     private final String farmerName;
-    private final TickSystem tickSystem; // Store tick system
+    private final TickSystem tickSystem;
     private Map<String, Integer> trailer;
     
     // Colours
@@ -18,7 +18,7 @@ public class Farmer implements Runnable {
         this.farmerName = farmerName;
         this.enclosure = enclosure;
         this.fields = fields;
-        this.tickSystem = tickSystem; // Assign tick system
+        this.tickSystem = tickSystem;
     }
 
     @Override

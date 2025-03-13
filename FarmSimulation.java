@@ -1,11 +1,11 @@
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FarmSimulation {
 
-    public static final long TICK_DURATION_MS = 500; // For minimal version, not too slow
+    public static final long TICK_DURATION_MS = 100; // For minimal version, not too slow
     private static final long SIMULATION_RUNTIME_MS = 30_000; // simulation run time
 
     public static void main(String[] args) {
@@ -17,11 +17,11 @@ public class FarmSimulation {
         Enclosure enclosure = new Enclosure();
 
         // Create the fields with initial values
-        Field pigsField = new Field("pigs", 0);
-        Field cowsField = new Field("cows", 0);
-        Field sheepField = new Field("sheep", 0);
-        Field llamasField = new Field("llamas", 0);
-        Field chickensField = new Field("chicken", 0);
+        Field pigsField = new Field("pigs", 0, tickSystem);
+        Field cowsField = new Field("cows", 0, tickSystem);
+        Field sheepField = new Field("sheep", 0, tickSystem);
+        Field llamasField = new Field("llamas", 0, tickSystem);
+        Field chickensField = new Field("chicken", 0, tickSystem);
 
         // Put the fields in the map for Farmer and Buyer
         Map<String, Field> fieldsMap = new HashMap<>();
