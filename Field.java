@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -51,7 +49,7 @@ public class Field {
         lock.lock();
         try {
             if (!buyerQueue.isEmpty()) {
-                buyerQueue.poll(); // 🚀 Remove the Buyer from the queue
+                buyerQueue.poll(); // Remove the Buyer from the queue
             }
         } finally {
             lock.unlock();
@@ -61,7 +59,7 @@ public class Field {
     public int getBuyersWaiting() {
         lock.lock();
         try {
-            return buyerQueue.size(); // 🚀 Return number of Buyers waiting
+            return buyerQueue.size(); // Return number of Buyers waiting
         } finally {
             lock.unlock();
         }
@@ -77,8 +75,11 @@ public class Field {
             int spaceLeft = capacity - count;
             int added = Math.min(spaceLeft, numberToAdd);
             count += added;
-            System.out.println("🌾 " + name + " count after stocking: " + count);
-
+            
+            System.out.println("🌾 Adding " + added + " to " + name + "field");
+            tickSystem.waitForNTicks(added);
+            System.out.println("🌾 " + name + " stocked. Count =  " + count);
+            
             // Signal that the field is not empty anymore (buyers can proceed)
             notEmpty.signalAll();
 

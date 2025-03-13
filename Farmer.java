@@ -88,7 +88,6 @@ public class Farmer implements Runnable {
         int travelTime = 10 + leftoverAnimals;
         tickSystem.waitForNTicks(travelTime);
         System.out.println(ANSI_YELLOW  + "🚜 " + farmerName + " traveled back to enclosure" + ANSI_RESET);
-
     }
 
     private int totalAnimalsInTrailer() {
