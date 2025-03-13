@@ -1,5 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FarmSimulation {
 
@@ -38,14 +40,22 @@ public class FarmSimulation {
         Thread deliveryThread = new Thread(delivery, "Delivery-Thread");
 
         // Create the Buyer -> TODO: for loop here
-        Buyer buyer = new Buyer(1, fieldsMap, tickSystem);
-        Thread buyerThread = new Thread(buyer, "Buyer-Thread");
+        
+        int numberOfBuyers = 3; // Change this number to adjust how many buyers are created
+        List<Thread> buyerThreads = new ArrayList<>();
+
+        for (int i = 1; i <= numberOfBuyers; i++) {
+            Buyer buyer = new Buyer("Buyer-" + i, fieldsMap, tickSystem); // Each buyer gets a unique ID
+            Thread buyerThread = new Thread(buyer, "Buyer-" + i);
+            buyerThreads.add(buyerThread);
+            buyerThread.start(); // Start the buyer thread
+        }
+
         
 
         // Start all threads
         farmerThread.start();
         deliveryThread.start();
-        buyerThread.start();
         
 
         /** The current thread (FarmSimualtion main) will sleep while the other threads
@@ -61,7 +71,9 @@ public class FarmSimulation {
         // Stop all threads
         farmerThread.interrupt();
         deliveryThread.interrupt();
-        buyerThread.interrupt();
+        for (Thread buyerThread : buyerThreads) { // Interrupt all buyer threads
+            buyerThread.interrupt();
+        }
 
         /** Ensure the main thread waits for te worker threads to fully shut down before
          * proceeding
@@ -69,7 +81,9 @@ public class FarmSimulation {
         try {
             farmerThread.join();
             deliveryThread.join();
-            buyerThread.join();
+            for (Thread buyerThread : buyerThreads) { // Join all buyer threads
+                buyerThread.join();
+            }
             // And rest of the threads here...
         } catch (InterruptedException e) {
             e.printStackTrace();
