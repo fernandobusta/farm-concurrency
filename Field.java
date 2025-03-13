@@ -8,42 +8,67 @@ public class Field {
     // Maybe inherit field class from another class (or interface) that has locks
     // or sempahores already implemented
     private final String name;
-    private int animalCount;
+    private int count;
+    private int capacity;
     private final List<Buyer> buyerQueue = new ArrayList<>();
 
     private final Lock lock = new ReentrantLock(true);
     private final Condition notEmpty = lock.newCondition(); // condition to wait if empty
+    private final Condition notFull = lock.newCondition();
 
     public Field(String name, int initialAnimalCount) {
         this.name = name;
-        this.animalCount = initialAnimalCount;
+        this.count = initialAnimalCount;
     }
 
     public String getName() {
         return name;
     }
-    public int getAnimalCount() {
-        return animalCount;
+    public int getCount() {
+        return count;
     }
 
-    public void setAnimalCount(int newAnimalCount) {
-        this.animalCount = newAnimalCount;
+    public void setCount(int newAnimalCount) {
+        this.count = newAnimalCount;
     }
 
     public void addBuyerToQueue(Buyer buyer) {
         this.buyerQueue.add(buyer);
     }
 
-    public synchronized void awaitStock() throws InterruptedException {
-        while (animalCount == 0) { // 🚨 Wait if no animals in the field
-            System.out.println("⏳ Buyer is waiting for " + name + " to be stocked...");
-            wait(); // 🚀 Waits until the Farmer calls `notifyAll()`
+    public int stock(int numberToAdd) throws InterruptedException {
+        lock.lock();
+        try {
+            while (count == capacity) {
+                notFull.await();
+            }
+            // If partial stocking is necessary
+            int spaceLeft = capacity - count;
+            int added = Math.min(spaceLeft, numberToAdd);
+            count += added;
+
+            // Signal that the field is not empty anymore (buyers can proceed)
+            notEmpty.signalAll();
+
+            return added; // The farmer cna see how many were stocked 
+        } finally {
+            lock.unlock();
         }
     }
-    
-    
-    
 
+    public void buyOne() throws InterruptedException {
+        lock.lock();
+        try {
+            while (count == 0){
+                notEmpty.await(); // Wait until some animals are available
+            }
+            count--;
+
+            notFull.signalAll(); // Let the farmer know it's not full
+        } finally {
+            lock.unlock();
+        }
+    }
     // ------------------------------------------------------------------------
     // Lock/Unlock Exposed methods
     // ------------------------------------------------------------------------
@@ -54,10 +79,4 @@ public class Field {
     public void unlockField() {
         lock.unlock();
     }
-    public synchronized void signalBuyers() {
-        System.out.println("🚀 Notifying Buyers that " + name + " is stocked");
-        notifyAll(); // 🚀 Wake up all waiting Buyers!
-    }
-    
-    
 }

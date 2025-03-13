@@ -38,7 +38,7 @@ public class FarmSimulation {
         Thread deliveryThread = new Thread(delivery, "Delivery-Thread");
 
         // Create the Buyer -> TODO: for loop here
-        Buyer buyer = new Buyer(1, enclosure, fieldsMap, tickSystem);
+        Buyer buyer = new Buyer(1, fieldsMap, tickSystem);
         Thread buyerThread = new Thread(buyer, "Buyer-Thread");
         
 
@@ -61,7 +61,6 @@ public class FarmSimulation {
         // Stop all threads
         farmerThread.interrupt();
         deliveryThread.interrupt();
-        System.out.println("Buyer thread is interrupted");
         buyerThread.interrupt();
 
         /** Ensure the main thread waits for te worker threads to fully shut down before

@@ -9,15 +9,15 @@ public class Delivery implements Runnable {
 
     private final Enclosure enclosure;
     private final Random rand;
-    private final TickSystem tickSystem; // ✅ Store tick system
-
+    private final TickSystem tickSystem; // Store tick system
 
     public Delivery (Enclosure enclosure, TickSystem tickSystem) {
         this.enclosure = enclosure;
         this.rand = new Random(123);
-        this.tickSystem = tickSystem; // ✅ Assign tick system
+        this.tickSystem = tickSystem; // Assign tick system
     }
 
+    @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {

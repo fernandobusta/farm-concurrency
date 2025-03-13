@@ -1,73 +1,86 @@
 import java.util.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Enclosure {
     private final Map<String, Integer> animals = new HashMap<>();
-    private final Random random = new Random();
+    private final Random rand;
+    
+    // Lock for all enclosure operations
+    private final ReentrantLock lock = new ReentrantLock(); // fair: true
+    
+    // Condition used to signal farmers that animals are now available
+    private final Condition notEmpty = lock.newCondition();
 
+    public Enclosure() {
+        this.rand = new Random();
+    }
 
-    public synchronized boolean isActuallyEmpty() {
+    private boolean hasNoAnimals() {
         return animals.values().stream().allMatch(count -> count == 0);
     }
 
     // Store animals from a delivery
-    public synchronized void storeFromDelivery(Map<String, Integer> delivery) {
-        for (Map.Entry<String, Integer> entry : delivery.entrySet()) {
-            String type = entry.getKey();
-            int count = entry.getValue();
-            animals.put(type, animals.getOrDefault(type, 0) + count);
+    public void storeFromDelivery(Map<String, Integer> delivery) throws InterruptedException{
+        lock.lock();
+        try {
+            for (Map.Entry<String, Integer> entry : delivery.entrySet()) {
+                String type = entry.getKey();
+                int count = entry.getValue();
+                animals.put(type, animals.getOrDefault(type, 0) + count);
+            }
+            System.out.println("✅ Enclosure updated: " + animals);
+            // Signal that enclosure is no longer empty
+            notEmpty.signalAll();
+        } finally {
+            lock.unlock();
         }
-        System.out.println("✅ Enclosure updated: " + animals);
-        notifyAll(); // 🚀 Wake up the Farmer!
     }
 
     // Subtract animals when taken by a farmer
-    public synchronized int subtractAnimals(String type, int count) {
-        int available = animals.getOrDefault(type, 0);
-        if (available >= count) {
-            animals.put(type, available - count);
-            return count;
-        } else {
-            animals.put(type, 0);
-            return available;
+    private void subtractAnimals(Map<String, Integer> loadedAnimals) {
+        for (Map.Entry<String, Integer> entry: loadedAnimals.entrySet()) {
+            String type = entry.getKey();
+            int count = entry.getValue();
+            // Subtract animal from the enclosure
+            animals.put(type, animals.get(type) - count);
         }
     }
 
     // Farmer loads animals into their trailer (up to capacity)
-    public synchronized Map<String, Integer> loadAnimalsIntoTrailer(int capacity) throws InterruptedException {
-        System.out.println("🚜 Farmer has arrived at enclosure");
-        System.out.println("🚜 Enclosure has: " + animals + " | Empty? " + animals.isEmpty());
-        while (isActuallyEmpty()) { // 🚨 Wait if all animal counts are 0
-            System.out.println("⏳ Farmer is waiting for animals...");
-            wait(); // ✅ Farmer will sleep until Delivery notifies
+    public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerName) throws InterruptedException {
+        lock.lock();
+        try {
+            System.out.println("🚜 Farmer " + farmerName + " has arrived at enclosure");
+            System.out.println("🚜 Enclosure has: " + animals);
+            while (hasNoAnimals()) { // Wait if all animal counts are 0
+                System.out.println("⏳ Farmer " + farmerName + " is waiting for animals...");
+                notEmpty.await();
+            }
+        
+            Map<String, Integer> loadedAnimals = new HashMap<>();
+            List<String> availableTypes = new ArrayList<>(animals.keySet());
+        
+            int spaceLeft = capacity;
+            
+            while (spaceLeft > 0 && !availableTypes.isEmpty()) {
+                String type = availableTypes.get(rand.nextInt(availableTypes.size())); // Pick a random animal type
+                int maxTake = Math.min(spaceLeft, animals.getOrDefault(type, 0)); // Max we can take
+                // TODO: Improve randomisation (Always take capacity)
+                if (maxTake > 0) {
+                    int numToTake = rand.nextInt(maxTake) + 1; // Take 1 to maxTake
+                    loadedAnimals.put(type, numToTake);
+                    spaceLeft -= numToTake;
+                } 
+                availableTypes.remove(type);
+            }
+        
+            System.out.println("🚜 Farmer received animals: " + loadedAnimals);
+            subtractAnimals(loadedAnimals); // Subtract loaded animals from enclosure
+            return loadedAnimals;
+        } finally {
+            lock.unlock();
         }
-    
-        Map<String, Integer> takenAnimals = new HashMap<>();
-        List<String> availableTypes = new ArrayList<>(animals.keySet());
-    
-        int spaceLeft = capacity;
-    
-        while (spaceLeft > 0 && !availableTypes.isEmpty()) {
-            String type = availableTypes.get(random.nextInt(availableTypes.size())); // Pick a random animal type
-            int maxTake = Math.min(spaceLeft, animals.getOrDefault(type, 0)); // Max we can take
-    
-            if (maxTake > 0) {
-                int numToTake = random.nextInt(maxTake) + 1; // Take 1 to maxTake
-                takenAnimals.put(type, numToTake);
-                subtractAnimals(type, numToTake);
-                spaceLeft -= numToTake;
-            } 
-    
-            availableTypes.remove(type);
-        }
-    
-        System.out.println("🚜 Farmer received animals: " + takenAnimals);
-        return takenAnimals;
-    }
-    
-
-    // Get current animal counts (for debugging/logging)
-    public synchronized Map<String, Integer> getAnimals() {
-        return new HashMap<>(animals);
     }
 }
 

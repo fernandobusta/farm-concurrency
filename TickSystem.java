@@ -13,13 +13,13 @@ public class TickSystem {
     }
 
     public synchronized void waitForNextTick() throws InterruptedException {
-        wait(); // 🚀 Threads will wait until the next tick
+        wait(); // Threads will wait until the next tick
     }
 
     public synchronized void nextTick() {
         currentTick++;
         System.out.println("⏳ Tick " + currentTick);
-        notifyAll(); // 🚀 Wake up all waiting threads
+        notifyAll(); // Wake up all waiting threads
     }
 
     public void start() {
