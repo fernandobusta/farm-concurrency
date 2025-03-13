@@ -22,7 +22,8 @@ public class Buyer implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 int nextBuyTick = 5 + rand.nextInt(11);
-                tickSystem.waitForTicks(nextBuyTick);
+                tickSystem.waitForNTicks(nextBuyTick);
+                
     
                 buyRandomAnimal();
     
