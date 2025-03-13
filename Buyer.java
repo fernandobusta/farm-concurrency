@@ -38,6 +38,6 @@ public class Buyer implements Runnable {
         List<String> keys = new ArrayList<>(fields.keySet());
         String animal = keys.get(rand.nextInt(keys.size()));
         Field field = fields.get(animal);
-        field.buyOne(buyerName, tickSystem);
+        field.buyOne(buyerName);
     }
 }
