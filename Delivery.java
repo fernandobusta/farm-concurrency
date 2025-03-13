@@ -1,33 +1,43 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Delivery implements Runnable {
-
     private final Enclosure enclosure;
+    private final TickSystem tickSystem;
     private final Random rand;
-    private final TickSystem tickSystem; // Store tick system
+    private int lastDeliveryTick = -100; // Ensures first delivery happens early
+    private int nextDeliveryThreshold; // Randomized delivery threshold
 
-    public Delivery (Enclosure enclosure, TickSystem tickSystem) {
+    public Delivery(Enclosure enclosure, TickSystem tickSystem) {
         this.enclosure = enclosure;
-        this.rand = new Random(123);
-        this.tickSystem = tickSystem; // Assign tick system
+        this.tickSystem = tickSystem;
+        this.rand = new Random();
+        this.nextDeliveryThreshold = 80 + rand.nextInt(40); // First threshold between 80-120 ticks
     }
 
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                // 1% chance per tick (1/100 probability)
-                if (rand.nextDouble() < 0.01) {  
+                tickSystem.waitForNextTick(); // Wait for next tick
+                
+                int currentTick = tickSystem.getCurrentTick();
+                boolean shouldDeliver = (rand.nextDouble() < 0.01) || (currentTick - lastDeliveryTick >= nextDeliveryThreshold);
+
+                if (shouldDeliver) {
                     Map<String, Integer> newDelivery = createRandomDelivery(10);
                     enclosure.storeFromDelivery(newDelivery);
-                    System.out.println(tickSystem.getCurrentTick() + " Delivery-Thread 📦 Delivery arrived: " + newDelivery);
+                    
+                    // ✅ Ensure `lastDeliveryTick` is updated
+                    lastDeliveryTick = currentTick; 
+                    
+                    // ✅ Set new random threshold between 80-120 ticks
+                    nextDeliveryThreshold = 80 + rand.nextInt(40); 
+
+                    System.out.println(currentTick + " 📦 Delivery arrived: " + newDelivery);
+                    System.out.println("🔄 Next delivery threshold set to: " + nextDeliveryThreshold + " ticks");
                 }
-                tickSystem.waitForNextTick(); // ⏳ Wait for next tick
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

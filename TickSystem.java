@@ -1,7 +1,12 @@
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class TickSystem {
     private int currentTick = 0;
     private final int totalTicks;
     private final int tickDuration; // Time in milliseconds per tick
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public TickSystem(int totalTicks, int tickDuration) {
         this.totalTicks = totalTicks;
@@ -13,25 +18,23 @@ public class TickSystem {
     }
 
     public synchronized void waitForNextTick() throws InterruptedException {
-        wait(); // Threads will wait until the next tick
+        int lastTick = currentTick;
+        while (currentTick == lastTick) {
+            wait(); // Wait until next tick occurs
+        }
     }
 
-    public synchronized void nextTick() {
-        currentTick++;
+    private synchronized void nextTick() {
+        currentTick = (currentTick + 1) % totalTicks; // Reset to 0 after a full day
         System.out.println("⏳ Tick " + currentTick);
         notifyAll(); // Wake up all waiting threads
     }
 
     public void start() {
-        new Thread(() -> {
-            while (currentTick < totalTicks) {
-                try {
-                    Thread.sleep(tickDuration); // Control tick speed
-                    nextTick();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }).start();
+        scheduler.scheduleAtFixedRate(this::nextTick, 0, tickDuration, TimeUnit.MILLISECONDS);
+    }
+
+    public void shutdown() {
+        scheduler.shutdownNow();
     }
 }
