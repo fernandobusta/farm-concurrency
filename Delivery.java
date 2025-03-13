@@ -24,16 +24,14 @@ public class Delivery implements Runnable {
                 boolean shouldDeliver = (rand.nextDouble() < 0.01) || (currentTick - lastDeliveryTick >= nextDeliveryThreshold);
 
                 if (shouldDeliver) {
+                    System.out.println("📦 New Delivery!");
                     Map<String, Integer> newDelivery = createRandomDelivery(10);
                     enclosure.storeFromDelivery(newDelivery);
                     
-                    // ✅ Ensure `lastDeliveryTick` is updated
                     lastDeliveryTick = currentTick; 
                     
-                    // ✅ Set new random threshold between 80-120 ticks
+                    // Set new random threshold between 80-120 ticks
                     nextDeliveryThreshold = 80 + rand.nextInt(40); 
-
-                    System.out.println(currentTick + " 📦 Delivery arrived: " + newDelivery);
                     System.out.println("🔄 Next delivery threshold set to: " + nextDeliveryThreshold + " ticks");
                 }
 
@@ -64,7 +62,6 @@ public class Delivery implements Runnable {
             spaceLeft -= newEntrySize;
         }
     
-        System.out.println("🔹 Generated delivery: " + newDelivery + " (Total: " + totalAnimals + ")");
         return newDelivery;
     }
 

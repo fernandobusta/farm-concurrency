@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Map;
 
 public class Farmer implements Runnable {
@@ -6,12 +7,14 @@ public class Farmer implements Runnable {
     private final Map<String, Field> fields;
     private final String farmerName;
     private final TickSystem tickSystem; // Store tick system
+    private Map<String, Integer> trailer;
     
     // Colours
     public static final String ANSI_RESET = "\u001B[0m"; 
     public static final String ANSI_YELLOW = "\u001B[33m";
 
     public Farmer(String farmerName, Enclosure enclosure, Map<String, Field> fields, TickSystem tickSystem) {
+        this.trailer = new HashMap<>();
         this.farmerName = farmerName;
         this.enclosure = enclosure;
         this.fields = fields;
@@ -23,41 +26,46 @@ public class Farmer implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 tickSystem.waitForNextTick(); // Wait before acting
-    
-                // Enclosure handles waiting, no need for extra check in Farmer
-                Map<String, Integer> trailerAnimals = enclosure.loadAnimalsIntoTrailer(10, farmerName);
 
-    
-                System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " received: " + trailerAnimals + ANSI_RESET);
-    
-                stockAnimals(trailerAnimals); // Move and stock all animals
-    
-                travelBackToEnclosure(0); // Return to the enclosure
-    
+                // Enclosure handles waiting, no need for extra check in Farmer
+                trailer = enclosure.loadAnimalsIntoTrailer(10, farmerName);
+
+                System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " received: " + trailer + ANSI_RESET);
+
+                stockAnimals(); // Move and stock all animals
+
+                travelBackToEnclosure(totalAnimalsInTrailer()); // Return to the enclosure
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             }
         }
     }
-    
 
-    private void stockAnimals(Map<String, Integer> animalsToField) throws InterruptedException {
+
+    private void stockAnimals() throws InterruptedException {
         // Perform the entire sequence fo travel and stock in fields of the animals
         // For each animal -> Walk to the field and add them to the field
-        for (Map.Entry<String, Integer> entry : animalsToField.entrySet()) {
+        for (Map.Entry<String, Integer> entry : trailer.entrySet()) {
             String animal = entry.getKey();
             int quantity = entry.getValue();
-
+            
+            
             // Travel from enclosure (or previous field)
-            travelToField(animal, quantity);
-
+            int totalAnimalsLeft = totalAnimalsInTrailer();
+            travelToField(animal, totalAnimalsLeft);
+            
+            System.out.println(ANSI_YELLOW  + "🚜 " + farmerName + " arrived at " + animal + " (count " + quantity + ")" + ANSI_RESET);
+            
             // Place the animals into the field
             Field field = fields.get(animal); // get the field from map
             
-            int actuallyStocked = field.stock(quantity); //We won't worry about capacity atm
+            int actuallyStocked = field.stock(quantity); // We won't worry about capacity atm
             System.out.println(ANSI_YELLOW + "✅ " + farmerName + " stocked " + actuallyStocked + " " + field.getName() + ANSI_RESET);
-
+            
+            // Eliminate animals from map
+            entry.setValue(0); // Assuming we stocked all of them (no capacity)
         }
     }
 
@@ -65,20 +73,23 @@ public class Farmer implements Runnable {
         int travelTime = 10 + numberOfAnimalsCarried; // 10 ticks + 1 per animal carried
     
         System.out.println(ANSI_YELLOW + "🚜 " + farmerName +  " carrying " 
-            + numberOfAnimalsCarried + " " + field + " (Travel Time: " + travelTime + " ticks)" + ANSI_RESET);
+            + numberOfAnimalsCarried + " animals " + " (Travel Time: " + travelTime + " ticks)" + ANSI_RESET);
     
         // Simulate travel time by waiting for each tick
         for (int i = 0; i < travelTime; i++) {
             tickSystem.waitForNextTick(); // Simulate travel ticks
         }
     
-        System.out.println(ANSI_YELLOW  + "🚜 " + farmerName + " Arrived at " + field + ANSI_RESET);
     }
 
     private void travelBackToEnclosure(int leftoverAnimals) throws InterruptedException {
         int travelTime = 10 + leftoverAnimals;
         tickSystem.waitForNTicks(travelTime);
-        System.out.println(ANSI_YELLOW  + "🚜" + farmerName + " traveled back to enclosure" + ANSI_RESET);
+        System.out.println(ANSI_YELLOW  + "🚜 " + farmerName + " traveled back to enclosure" + ANSI_RESET);
 
+    }
+
+    private int totalAnimalsInTrailer() {
+        return trailer.values().stream().mapToInt(Integer::intValue).sum();
     }
 }
