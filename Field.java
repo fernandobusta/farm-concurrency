@@ -98,7 +98,7 @@ public class Field {
             }
             count--;
 
-            System.out.println("🛒 " + buyerName + " bought 1 " + name + " (Remaining: " + count + ")");
+            System.out.println("Tick" + tickSystem.getCurrentTick() + " 🛒 " + buyerName + " bought 1 " + name + " (Remaining: " + count + ")");
             removeBuyerFromQueue();
             tickSystem.waitForNTicks(1); // Buyer waits for 1 tick after buying
 
