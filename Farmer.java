@@ -64,8 +64,10 @@ public class Farmer implements Runnable {
             int actuallyStocked = field.stock(quantity); // We won't worry about capacity atm
             System.out.println(ANSI_YELLOW + "✅ " + farmerName + " stocked " + actuallyStocked + " " + field.getName() + ANSI_RESET);
             
+            int leftToStock = quantity - actuallyStocked;
+
             // Eliminate animals from map
-            entry.setValue(0); // Assuming we stocked all of them (no capacity)
+            entry.setValue(leftToStock); // Assuming we stocked all of them (no capacity)
         }
     }
 

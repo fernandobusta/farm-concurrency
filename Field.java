@@ -9,7 +9,7 @@ public class Field {
     // or sempahores already implemented
     private final String name;
     private int count;
-    private int capacity = 99999;
+    private final int capacity = 10;
     private final List<Buyer> buyerQueue = new ArrayList<>();
 
     private final Lock lock = new ReentrantLock(true);
