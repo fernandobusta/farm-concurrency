@@ -75,8 +75,4 @@ public class Farmer implements Runnable {
     private void travelBackToEnclosure(int leftoverAnimals) throws InterruptedException {
         System.out.println("Going back to enclosure -> add ticks");
     }
-
-
-
-    
 }

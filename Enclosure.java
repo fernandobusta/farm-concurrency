@@ -60,21 +60,17 @@ public class Enclosure {
         
             Map<String, Integer> loadedAnimals = new HashMap<>();
             List<String> availableTypes = new ArrayList<>(animals.keySet());
+            Collections.shuffle(availableTypes);
         
             int spaceLeft = capacity;
-            
-            while (spaceLeft > 0 && !availableTypes.isEmpty()) {
+
+            while (spaceLeft != 0 && !hasNoAnimals()) {
                 String type = availableTypes.get(rand.nextInt(availableTypes.size())); // Pick a random animal type
-                int maxTake = Math.min(spaceLeft, animals.getOrDefault(type, 0)); // Max we can take
-                // TODO: Improve randomisation (Always take capacity)
-                if (maxTake > 0) {
-                    int numToTake = rand.nextInt(maxTake) + 1; // Take 1 to maxTake
-                    loadedAnimals.put(type, numToTake);
-                    spaceLeft -= numToTake;
-                } 
+                int numToTake = Math.min(spaceLeft, animals.get(type));
+                loadedAnimals.put(type, numToTake);
+                spaceLeft -= numToTake;
                 availableTypes.remove(type);
             }
-        
             System.out.println("🚜 Farmer received animals: " + loadedAnimals);
             subtractAnimals(loadedAnimals); // Subtract loaded animals from enclosure
             return loadedAnimals;
