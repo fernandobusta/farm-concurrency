@@ -4,14 +4,14 @@ import java.util.Map;
 import java.util.Random;
 
 public class Buyer implements Runnable {
-    private final int buyerId;
+    private final String buyerName;
     private final Map<String, Field> fields;
     private final Random rand;
     private final TickSystem tickSystem; // Store tick system
 
 
-    public Buyer(int buyerId, Map<String, Field> fields, TickSystem tickSystem) {
-        this.buyerId = buyerId;
+    public Buyer(String buyerName, Map<String, Field> fields, TickSystem tickSystem) {
+        this.buyerName = buyerName;
         this.fields = fields;
         this.rand = new Random();
         this.tickSystem = tickSystem; // Assign tick system
@@ -38,6 +38,6 @@ public class Buyer implements Runnable {
         List<String> keys = new ArrayList<>(fields.keySet());
         String animal = keys.get(rand.nextInt(keys.size()));
         Field field = fields.get(animal);
-        field.buyOne(tickSystem);
+        field.buyOne(buyerName, tickSystem);
     }
 }

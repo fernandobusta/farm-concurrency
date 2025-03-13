@@ -56,16 +56,16 @@ public class Field {
         }
     }
 
-    public void buyOne(TickSystem tickSystem) throws InterruptedException {
+    public void buyOne(String buyerName, TickSystem tickSystem) throws InterruptedException {
         lock.lock();
         try {
             while (count == 0){
-                System.out.println("⏳ Buyer is waiting for " + name + " to be stocked...");
+                System.out.println("⏳ " + buyerName + " is waiting for " + name + " to be stocked...");
                 notEmpty.await(); // Wait until some animals are available
             }
             count--;
 
-            System.out.println("🛒 Buyer 1 bought 1 " + name + " (Remaining: " + count + ")");
+            System.out.println("🛒 " + buyerName + " bought 1 " + name + " (Remaining: " + count + ")");
 
             notFull.signalAll(); // Let the farmer know it's not full
         } finally {
