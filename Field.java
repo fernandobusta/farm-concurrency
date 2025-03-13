@@ -78,7 +78,7 @@ public class Field {
             int added = Math.min(spaceLeft, numberToAdd);
             count += added;
             System.out.println("🌾 " + name + " count after stocking: " + count);
-
+            tickSystem.waitForNTicks(added);
             // Signal that the field is not empty anymore (buyers can proceed)
             notEmpty.signalAll();
 
