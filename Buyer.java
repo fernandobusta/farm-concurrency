@@ -21,8 +21,11 @@ public class Buyer implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                tickSystem.waitForNextTick(); // Wait for tick before buying
+                int nextBuyTick = 5 + rand.nextInt(11);
+                tickSystem.waitForTicks(nextBuyTick);
+    
                 buyRandomAnimal();
+    
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -34,9 +37,6 @@ public class Buyer implements Runnable {
         List<String> keys = new ArrayList<>(fields.keySet());
         String animal = keys.get(rand.nextInt(keys.size()));
         Field field = fields.get(animal);
-
-        System.out.println("⏳ Buyer " + buyerId + " waiting to buy " + field.getName());
-        field.buyOne();
-        System.out.println("🛒 Buyer " + buyerId + " bought 1 " + field.getName());
+        field.buyOne(tickSystem);
     }
 }
