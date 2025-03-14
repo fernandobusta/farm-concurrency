@@ -32,8 +32,14 @@ public class FarmSimulation {
         fieldsMap.put("chicken", chickensField);
 
         // Create the farmer
-        Farmer singleFarmer = new Farmer("Farmer-01", enclosure, fieldsMap, tickSystem);
-        Thread farmerThread = new Thread(singleFarmer, "Farmer-Thread");
+        int numberOfFarmers = 3;
+        List<Thread> farmerThreads = new ArrayList<>();
+        for (int i=1; i <= numberOfFarmers; i++) {
+            Farmer singleFarmer = new Farmer("Farmer-0"+i, enclosure, fieldsMap, tickSystem);
+            Thread farmerThread = new Thread(singleFarmer, "Farmer-"+i);
+            farmerThreads.add(farmerThread);
+            farmerThread.start();
+        }
 
         // Create the Delivery
         Delivery delivery = new Delivery(enclosure, tickSystem);
@@ -50,11 +56,6 @@ public class FarmSimulation {
             buyerThreads.add(buyerThread);
             buyerThread.start(); // Start the buyer thread
         }
-
-        
-
-        // Start all threads
-        farmerThread.start();
         deliveryThread.start();
         
 
@@ -69,7 +70,9 @@ public class FarmSimulation {
         }
 
         // Stop all threads
-        farmerThread.interrupt();
+        for (Thread farmerThread : farmerThreads) {
+            farmerThread.interrupt();
+        }
         deliveryThread.interrupt();
         for (Thread buyerThread : buyerThreads) { // Interrupt all buyer threads
             buyerThread.interrupt();
@@ -79,7 +82,9 @@ public class FarmSimulation {
          * proceeding
          */
         try {
-            farmerThread.join();
+            for (Thread farmerThread : farmerThreads) { // Join all buyer threads
+                farmerThread.join();
+            }
             deliveryThread.join();
             for (Thread buyerThread : buyerThreads) { // Join all buyer threads
                 buyerThread.join();
