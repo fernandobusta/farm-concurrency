@@ -1,5 +1,6 @@
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -17,6 +18,7 @@ public class Field {
     private final Condition notFull = lock.newCondition();
 
     private final Queue<String> buyerQueue = new LinkedList<>();
+    private AtomicInteger buyersWaiting = new AtomicInteger(0);
 
     public Field(String name, int initialAnimalCount, TickSystem tickSystem) {
 
@@ -35,35 +37,20 @@ public class Field {
     public void setCount(int newAnimalCount) {
         this.count = newAnimalCount;
     }
+    
 
-    public void addBuyerToQueue(String buyerName) {
-        lock.lock();
-        try {
-            buyerQueue.add(buyerName);
-        } finally {
-            lock.unlock();
-        }
+
+    public int getBuyersWaiting() {
+        return buyersWaiting.get(); // No lock needed
+    }
+
+    public void addBuyerToQueue() {
+        buyersWaiting.incrementAndGet();
     }
 
     public void removeBuyerFromQueue() {
-        lock.lock();
-        try {
-            if (!buyerQueue.isEmpty()) {
-                buyerQueue.poll(); // Remove the Buyer from the queue
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public int getBuyersWaiting() {
-        lock.lock();
-        try {
-            return buyerQueue.size(); // Return number of Buyers waiting
-        } finally {
-            lock.unlock();
-        }
-    }
+        buyersWaiting.decrementAndGet();
+}
 
     public int stock(int numberToAdd) throws InterruptedException {
         lock.lock();
@@ -89,15 +76,18 @@ public class Field {
         }
     }
 
-    public void buyOne(String buyerName) throws InterruptedException {
+    public void buyOne(String buyerName, int tickItGotIntoQueue) throws InterruptedException {
         lock.lock();
         try {
             while (count == 0){
                 System.out.println("⏳ " + buyerName + " is waiting for " + name + " to be stocked...");
-                addBuyerToQueue(buyerName);
+                addBuyerToQueue();
                 notEmpty.await(); // Wait until some animals are available
             }
             count--;
+
+            int waitedTicks = tickSystem.getCurrentTick() - tickItGotIntoQueue;
+            System.out.println("🛒 " + tickSystem.getCurrentTick() + " | " + buyerName + " collected 1: " + name + " from field after waiting " + waitedTicks + " ticks." + "(Remaining " + name + ":" + count + ")");
 
             System.out.println("Tick" + tickSystem.getCurrentTick() + " 🛒 " + buyerName + " bought 1 " + name + " (Remaining: " + count + ")");
             removeBuyerFromQueue();

@@ -8,6 +8,7 @@ public class Buyer implements Runnable {
     private final Map<String, Field> fields;
     private final Random rand;
     private final TickSystem tickSystem; // Store tick system
+    private int tickItGotIntoQueue = -1;
 
 
     public Buyer(String buyerName, Map<String, Field> fields, TickSystem tickSystem) {
@@ -37,7 +38,15 @@ public class Buyer implements Runnable {
     private void buyRandomAnimal() throws InterruptedException {
         List<String> keys = new ArrayList<>(fields.keySet());
         String animal = keys.get(rand.nextInt(keys.size()));
+        int currentTick = tickSystem.getCurrentTick(); 
+        tickItGotIntoQueue = currentTick;
+
         Field field = fields.get(animal);
-        field.buyOne(buyerName);
+        field.buyOne(buyerName, this.tickItGotIntoQueue);
+    }
+
+    public int getWaitTime(int currentTick) {
+        int waitedTicks = currentTick - tickItGotIntoQueue;
+        return waitedTicks;
     }
 }

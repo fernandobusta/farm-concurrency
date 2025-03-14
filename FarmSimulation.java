@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class FarmSimulation {
 
-    public static final long TICK_DURATION_MS = 100; // For minimal version, not too slow
+    public static final long TICK_DURATION_MS = 10; // For minimal version, not too slow
     private static final long SIMULATION_RUNTIME_MS = 30_000; // simulation run time
 
     public static void main(String[] args) {
@@ -14,7 +14,6 @@ public class FarmSimulation {
         tickSystem.start(); // Start ticking
         
         // Create the enclosure (shared by delivery and farmer)
-        Enclosure enclosure = new Enclosure();
 
         // Create the fields with initial values
         Field pigsField = new Field("pigs", 0, tickSystem);
@@ -31,6 +30,7 @@ public class FarmSimulation {
         fieldsMap.put("llamas", llamasField);
         fieldsMap.put("chicken", chickensField);
 
+        Enclosure enclosure = new Enclosure(fieldsMap);
         // Create the farmer
         int numberOfFarmers = 3;
         List<Thread> farmerThreads = new ArrayList<>();
