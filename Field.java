@@ -1,13 +1,9 @@
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Field {
-    // Maybe inherit field class from another class (or interface) that has locks
-    // or sempahores already implemented
     private final String name;
     private int count;
     private final int capacity = 10;
@@ -17,8 +13,7 @@ public class Field {
     private final Condition notEmpty = lock.newCondition(); // condition to wait if empty
     private final Condition notFull = lock.newCondition();
 
-    private final Queue<String> buyerQueue = new LinkedList<>();
-    private AtomicInteger buyersWaiting = new AtomicInteger(0);
+    private final AtomicInteger buyersWaiting = new AtomicInteger(0);
 
     public Field(String name, int initialAnimalCount, TickSystem tickSystem) {
 
@@ -38,8 +33,6 @@ public class Field {
         this.count = newAnimalCount;
     }
     
-
-
     public int getBuyersWaiting() {
         return buyersWaiting.get(); // No lock needed
     }
@@ -99,15 +92,5 @@ public class Field {
         }
 
 
-    }
-    // ------------------------------------------------------------------------
-    // Lock/Unlock Exposed methods
-    // ------------------------------------------------------------------------
-
-    public void lockField() { 
-        lock.lock();
-    }
-    public void unlockField() {
-        lock.unlock();
     }
 }

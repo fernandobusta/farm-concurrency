@@ -39,16 +39,6 @@ public class Enclosure {
         }
     }
 
-    // Subtract animals when taken by a farmer
-    private void subtractAnimals(Map<String, Integer> loadedAnimals) {
-        for (Map.Entry<String, Integer> entry: loadedAnimals.entrySet()) {
-            String type = entry.getKey();
-            int count = entry.getValue();
-            // Subtract animal from the enclosure
-            animals.put(type, animals.get(type) - count);
-        }
-    }
-
     // Farmer loads animals into their trailer (up to capacity
 public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerName) throws InterruptedException {
     lock.lock();
@@ -79,7 +69,7 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
         Map<String, Integer> loadedAnimals = new LinkedHashMap<>();
         int spaceLeft = capacity;
 
-        // Step 1: Take at most 4 from the highest-priority animal
+        // Take at most 4 from the highest priority animal
         if (!sortedAnimals.isEmpty() && spaceLeft > 0) {
             Map.Entry<String, Integer> firstChoice = sortedAnimals.get(0);
             int numToTake = Math.min(4, Math.min(spaceLeft, firstChoice.getValue()));
@@ -89,7 +79,7 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
             sortedAnimals.remove(firstChoice);
         }
 
-        // Step 2: Take at most 3 from the second-highest priority animal
+        // Take at most 3 from the second-highest priority animal
         if (!sortedAnimals.isEmpty() && spaceLeft > 0) {
             Map.Entry<String, Integer> secondChoice = sortedAnimals.get(0);
             int numToTake = Math.min(3, Math.min(spaceLeft, secondChoice.getValue()));
@@ -99,7 +89,7 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
             sortedAnimals.remove(secondChoice);
         }
 
-        // Step 3: Evenly distribute remaining space among other animals
+        // Evenly distribute remaining space among other animals
         int index = 0;
         while (spaceLeft > 0 && !sortedAnimals.isEmpty()) {
             Map.Entry<String, Integer> entry = sortedAnimals.get(index % sortedAnimals.size());
@@ -112,7 +102,7 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
                 spaceLeft -= numToTake;
             }
 
-            index++; // Move to the next animal type (round-robin)
+            index++; // Move to the next animal type 
         }
 
         System.out.println("🚜 " + farmerName + " received: " + loadedAnimals);
