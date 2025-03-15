@@ -108,7 +108,7 @@ public class FarmSimulation {
         ArrayList<String> fields = new ArrayList<>(List.of("pigs", "cows", "sheep", "llamas", "chicken", "bulls", "dogs", "cats", "rabbits", "horses"));
         Map<String, Field> fieldsMap = new HashMap<>();
 
-        for (int i=1; i <= numFields; i++) {
+        for (int i=0; i <= numFields; i++) {
             Field newField = new Field(fields.get(i), 0, tickSystem);
             fieldsMap.put(fields.get(i), newField);
         }
