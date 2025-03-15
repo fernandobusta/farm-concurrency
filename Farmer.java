@@ -1,5 +1,10 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 
 public class Farmer implements Runnable {
 
@@ -47,10 +52,21 @@ public class Farmer implements Runnable {
     private void stockAnimals() throws InterruptedException {
         // Perform the entire sequence fo travel and stock in fields of the animals
         // For each animal -> Walk to the field and add them to the field
-        for (Map.Entry<String, Integer> entry : trailer.entrySet()) {
-            String animal = entry.getKey();
-            int quantity = entry.getValue();
+         Set<String> visitedFields = new HashSet<>();
+         
+        // Create an iterator to safely traverse the trailer's animal entries
+        Iterator<Map.Entry<String, Integer>> iterator = trailer.entrySet().iterator();
+
+        while (iterator.hasNext()) { // Loop through each type of animal in the trailer
+            Map.Entry<String, Integer> entry = iterator.next(); // Get the current animal entry
+            String animal = entry.getKey(); // Extract the animal type (e.g., "sheep", "pigs")
+            int quantity = entry.getValue(); // Extract the number of animals being carried
+
+            Field field = fields.get(animal); // Get the corresponding field where these animals go
+
             
+             // Skip already visited fields
+            if (visitedFields.contains(animal)) continue;
             
             // Travel from enclosure (or previous field)
             int totalAnimalsLeft = totalAnimalsInTrailer();
@@ -59,16 +75,20 @@ public class Farmer implements Runnable {
             System.out.println(ANSI_YELLOW  + "🚜 " + farmerName + " arrived at " + animal + " (count " + quantity + ")" + ANSI_RESET);
             
             // Place the animals into the field
-            Field field = fields.get(animal); // get the field from map
             
             int actuallyStocked = field.stock(quantity); // We won't worry about capacity atm
             System.out.println(ANSI_YELLOW + "✅ " + farmerName + " stocked " + actuallyStocked + " " + field.getName() + ANSI_RESET);
             
             int leftToStock = quantity - actuallyStocked;
 
-            // Eliminate animals from map
-            entry.setValue(leftToStock); // Assuming we stocked all of them (no capacity)
+            if (leftToStock > 0) {
+                entry.setValue(leftToStock); // ✅ Keep the remaining animals
+                visitedFields.add(animal);   // ✅ Mark field as full
+            } else {
+                iterator.remove(); // ✅ Remove fully stocked animals
+            }
         }
+
     }
 
     private void travelToField(String field, int numberOfAnimalsCarried) throws InterruptedException {
