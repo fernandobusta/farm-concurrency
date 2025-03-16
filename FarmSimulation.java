@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class FarmSimulation {
 
     public static final long TICK_DURATION_MS = 10; // For minimal version, not too slow
-    private static final long SIMULATION_RUNTIME_MS = 30_000; // simulation run time
+    private static final long SIMULATION_RUNTIME_MS = 300_000; // simulation run time
 
     public static int[] showWelcomeScreen() {
         Scanner scanner = new Scanner(System.in);
@@ -82,7 +82,7 @@ public class FarmSimulation {
                                                   /               \\  |                    /"---"` .::'    '   \\
                                                  /|               |\\ |                    |:  .::.     /  .::;|
                                                   |    _______    |  |                    |'  ::'   .:|    ':||
-                                                 |    |--|--|    |  |                     \\   \\  \\ '\\     /\\\\
+                                                  |    |--|--|    |  |                     \\   \\  \\ '\\     /\\\\
                               |---|---|---|---|---|    |==|==|    |  |                      \\`;-'| |-.-'-,  \\ |)
                               |---|---|---|---|---|    |==|==|    |  |                      ( | ( | `-uu ( |
                               |---|---|---|---|---|    |==|==|    |  |                       ||  ||    || ||

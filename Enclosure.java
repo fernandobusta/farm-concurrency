@@ -92,6 +92,7 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
         // Evenly distribute remaining space among other animals
         int index = 0;
         while (spaceLeft > 0 && !sortedAnimals.isEmpty()) {
+            System.out.println("SortedAnimals Sisze " + sortedAnimals.size() + " and index " + index + " doing the modulo " + (index % sortedAnimals.size()));
             Map.Entry<String, Integer> entry = sortedAnimals.get(index % sortedAnimals.size());
             String type = entry.getKey();
             int numToTake = Math.min(1, entry.getValue()); // Take only 1 per round
