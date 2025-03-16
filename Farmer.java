@@ -35,10 +35,12 @@ public class Farmer implements Runnable {
 
                 // Calculate available space in the trailer
                 int currentLoad = totalAnimalsInTrailer();
+                System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " has " + currentLoad + " animals in the trailer" + ANSI_RESET);
                 int availableSpace = maxCapacity - currentLoad;
 
                 // Load only if there is space left
                 if (availableSpace > 0 ) {
+                    System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " is loading animals into the trailer" + ANSI_RESET);
                     trailer = enclosure.loadAnimalsIntoTrailer(trailer, availableSpace, farmerName);
                 }
 
@@ -47,6 +49,7 @@ public class Farmer implements Runnable {
                 stockAnimals(); // Move and stock all animals
 
                 travelBackToEnclosure(totalAnimalsInTrailer()); // Return to the enclosure
+                System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " returned to the enclosure" + ANSI_RESET);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
