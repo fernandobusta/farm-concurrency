@@ -108,9 +108,15 @@ public class FarmSimulation {
         ArrayList<String> fields = new ArrayList<>(List.of("pigs", "cows", "sheep", "llamas", "chicken", "bulls", "dogs", "cats", "rabbits", "horses"));
         Map<String, Field> fieldsMap = new HashMap<>();
 
-        for (int i=0; i <= numFields; i++) {
+        // Cut the list
+        if (numFields < fields.size()) {
+            fields = new ArrayList<>(fields.subList(0, numFields));
+        }
+
+        for (int i=0; i < numFields; i++) {
             Field newField = new Field(fields.get(i), 0, tickSystem);
             fieldsMap.put(fields.get(i), newField);
+
         }
 
         Enclosure enclosure = new Enclosure(fieldsMap);
@@ -125,7 +131,7 @@ public class FarmSimulation {
         }
 
         // Create the Delivery
-        Delivery delivery = new Delivery(enclosure, tickSystem);
+        Delivery delivery = new Delivery(enclosure, tickSystem, fields);
         Thread deliveryThread = new Thread(delivery, "Delivery-Thread");
         
         int numberOfBuyers = 3; // Change this number to adjust how many buyers are created
