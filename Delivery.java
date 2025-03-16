@@ -21,7 +21,7 @@ public class Delivery implements Runnable {
                 tickSystem.waitForNextTick(); // Wait for next tick
                 
                 int currentTick = tickSystem.getCurrentTick();
-                boolean shouldDeliver = (rand.nextDouble() < 0.06) || (currentTick - lastDeliveryTick >= nextDeliveryThreshold);
+                boolean shouldDeliver = (rand.nextDouble() < 0.01) || (currentTick - lastDeliveryTick >= nextDeliveryThreshold);
 
                 if (shouldDeliver) {
                     System.out.println("📦 New Delivery!");
