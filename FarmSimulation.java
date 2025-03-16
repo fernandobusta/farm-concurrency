@@ -99,7 +99,7 @@ public class FarmSimulation {
         int numFarmers = farmSetup[0];
         int numFields = farmSetup[1];
 
-        TickSystem tickSystem = new TickSystem(1000, 100); // 1000 ticks/day, 100ms per tick
+        TickSystem tickSystem = new TickSystem(1000, 10); // 1000 ticks/day, 100ms per tick
         tickSystem.start(); // Start ticking
         
         // Create the enclosure (shared by delivery and farmer)

@@ -40,7 +40,7 @@ public class Enclosure {
     }
 
     // Farmer loads animals into their trailer (up to capacity
-public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerName) throws InterruptedException {
+public Map<String, Integer> loadAnimalsIntoTrailer(Map<String, Integer> existingTrailer, int capacity, String farmerName) throws InterruptedException {
     lock.lock();
     try {
         System.out.println("🚜 " + farmerName + " has arrived at enclosure with capacity of: " + capacity);
@@ -50,6 +50,8 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
             System.out.println("⏳ Farmer " + farmerName + " is waiting for animals...");
             notEmpty.await();
         }
+
+        System.out.println("🚜 " + farmerName + " is loading animals into the trailer and has lock");
 
         // Convert enclosure animals into a list and sort based on priority
         List<Map.Entry<String, Integer>> sortedAnimals = new ArrayList<>(animals.entrySet());
@@ -74,6 +76,7 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
             Map.Entry<String, Integer> firstChoice = sortedAnimals.get(0);
             int numToTake = Math.min(4, Math.min(spaceLeft, firstChoice.getValue()));
             loadedAnimals.put(firstChoice.getKey(), numToTake);
+            System.out.println("🚜 " + farmerName + " is taking first " + numToTake + " " + firstChoice.getKey());
             animals.put(firstChoice.getKey(), animals.get(firstChoice.getKey()) - numToTake);
             spaceLeft -= numToTake;
             sortedAnimals.remove(firstChoice);
@@ -84,26 +87,34 @@ public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerNa
             Map.Entry<String, Integer> secondChoice = sortedAnimals.get(0);
             int numToTake = Math.min(3, Math.min(spaceLeft, secondChoice.getValue()));
             loadedAnimals.put(secondChoice.getKey(), numToTake);
+            System.out.println("🚜 " + farmerName + " is taking second " + numToTake + " " + secondChoice.getKey());
             animals.put(secondChoice.getKey(), animals.get(secondChoice.getKey()) - numToTake);
             spaceLeft -= numToTake;
             sortedAnimals.remove(secondChoice);
         }
 
         // Evenly distribute remaining space among other animals
-        int index = 0;
-        while (spaceLeft > 0 && !sortedAnimals.isEmpty()) {
-            Map.Entry<String, Integer> entry = sortedAnimals.get(index % sortedAnimals.size());
+        Iterator<Map.Entry<String, Integer>> it = sortedAnimals.iterator();
+        while (spaceLeft > 0 && it.hasNext()) {
+            Map.Entry<String, Integer> entry = it.next();
             String type = entry.getKey();
-            int numToTake = Math.min(1, entry.getValue()); // Take only 1 per round
+            int available = entry.getValue();
+            
+            if (available > 0) { // Only take if there are animals left
+                int numToTake = Math.min(spaceLeft, available); // Take up to the remaining space
+                System.out.println("🚜 " + farmerName + " is taking last " + numToTake + " " + type);
 
-            if (numToTake > 0) {
                 loadedAnimals.put(type, loadedAnimals.getOrDefault(type, 0) + numToTake);
-                animals.put(type, animals.get(type) - numToTake);
+                animals.put(type, available - numToTake); // Subtract from enclosure
                 spaceLeft -= numToTake;
             }
-
-            index++; // Move to the next animal type 
+            
+            // Remove entry if all animals have been taken
+            if (animals.get(type) == 0) {
+                it.remove();
+            }
         }
+
 
         System.out.println("🚜 " + farmerName + " received: " + loadedAnimals);
         return loadedAnimals;
