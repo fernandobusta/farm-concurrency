@@ -13,6 +13,7 @@ public class Farmer implements Runnable {
     private final String farmerName;
     private final TickSystem tickSystem;
     private Map<String, Integer> trailer;
+    private final int maxCapacity = 10;
     
     // Colours
     public static final String ANSI_RESET = "\u001B[0m"; 
@@ -32,8 +33,14 @@ public class Farmer implements Runnable {
             try {
                 tickSystem.waitForNextTick(); // Wait before acting
 
-                // Enclosure handles waiting, no need for extra check in Farmer
-                trailer = enclosure.loadAnimalsIntoTrailer(10, farmerName);
+                // Calculate available space in the trailer
+                int currentLoad = totalAnimalsInTrailer();
+                int availableSpace = maxCapacity - currentLoad;
+
+                // Load only if there is space left
+                if (availableSpace > 0 ) {
+                    trailer = enclosure.loadAnimalsIntoTrailer(trailer, availableSpace, farmerName);
+                }
 
                 System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " received: " + trailer + ANSI_RESET);
 

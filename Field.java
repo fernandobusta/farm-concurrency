@@ -49,7 +49,9 @@ public class Field {
         lock.lock();
         try {
             while (count == capacity) {
-                notFull.await();
+                System.out.println("⏳ Field is full. Waiting for buyers to buy...");
+                System.out.println("count: " + count + " capacity: " + capacity);
+                return 0;
             }
             // If partial stocking is necessary
             int spaceLeft = capacity - count;

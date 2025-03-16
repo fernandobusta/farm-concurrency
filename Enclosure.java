@@ -40,7 +40,7 @@ public class Enclosure {
     }
 
     // Farmer loads animals into their trailer (up to capacity
-public Map<String, Integer> loadAnimalsIntoTrailer(int capacity, String farmerName) throws InterruptedException {
+public Map<String, Integer> loadAnimalsIntoTrailer(Map<String, Integer> existingTrailer, int capacity, String farmerName) throws InterruptedException {
     lock.lock();
     try {
         System.out.println("🚜 " + farmerName + " has arrived at enclosure with capacity of: " + capacity);
