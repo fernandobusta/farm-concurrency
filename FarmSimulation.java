@@ -10,7 +10,6 @@ import java.util.Scanner;
 
 public class FarmSimulation {
 
-    public static long TICK_DURATION_MS = 10; // For minimal version, not too slow
     private static final long SIMULATION_RUNTIME_MS = 300_000; // simulation run time
 
 
