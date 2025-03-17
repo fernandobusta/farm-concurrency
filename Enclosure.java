@@ -4,7 +4,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Enclosure {
     private final Map<String, Integer> animals = new HashMap<>();
-    private final Random rand;
     private final Map<String, Field> fields;
     
     // Lock for all enclosure operations
@@ -14,7 +13,6 @@ public class Enclosure {
     private final Condition notEmpty = lock.newCondition();
 
     public Enclosure(Map<String, Field> fields) {
-        this.rand = new Random();
         this.fields = fields;
     }
 

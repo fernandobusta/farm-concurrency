@@ -24,8 +24,6 @@ public class Buyer implements Runnable {
             try {
                 int nextBuyTick = 5 + rand.nextInt(11);
                 tickSystem.waitForNTicks(nextBuyTick);
-                
-    
                 buyRandomAnimal();
     
             } catch (InterruptedException e) {
