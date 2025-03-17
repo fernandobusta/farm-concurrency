@@ -29,7 +29,6 @@ public class Delivery implements Runnable {
                 boolean shouldDeliver = (rand.nextDouble() < deliveryProbabilty) || (currentTick - lastDeliveryTick >= nextDeliveryThreshold);
 
                 if (shouldDeliver) {
-                    System.out.println("📦 New Delivery!");
                     Map<String, Integer> newDelivery = createRandomDelivery(10);
                     enclosure.storeFromDelivery(newDelivery);
                     
@@ -37,7 +36,7 @@ public class Delivery implements Runnable {
                     
                     // Set new random threshold between 80-120 ticks
                     nextDeliveryThreshold = 80 + rand.nextInt(40);
-                    System.out.println("🔄 Next delivery threshold set to: " + nextDeliveryThreshold + " ticks");
+                    System.out.println("     "+currentTick + " " + Thread.currentThread().getId() + " Next_delivery_threshold : " + nextDeliveryThreshold + " ticks");
                 }
 
             } catch (InterruptedException e) {

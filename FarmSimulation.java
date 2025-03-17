@@ -28,9 +28,9 @@ public class FarmSimulation {
         int initialFieldCount = getIntProperty(configProps, "initialFieldCount", 5);
         int tickDuration = getIntProperty(configProps, "tickDuration", 100);
         int breakDuration = getIntProperty(configProps, "breakDuration", 150);
-        int lowerBoundBreakInterval = getIntProperty(configProps, "lowerBoundBreakInterval", 300);
+        int lowerBoundBreakInterval = getIntProperty(configProps, "lowerBoundBreakInterval", 200);
         int upperBoundBreakInterval = getIntProperty(configProps, "upperBoundBreakInterval", 300);
-        double deliveryProbability = getDoubleProperty(configProps, "deliveryProbability", 100);
+        double deliveryProbability = getDoubleProperty(configProps, "deliveryProbability", 0.01);
 
         if (initialFieldCount > fieldCapacity) {
             System.err.println("Initial field count can't be bigger than capacity. Using defaults 5 and 10 respectively.");
@@ -88,7 +88,7 @@ public class FarmSimulation {
         }
         
         // =========================== Enclosure ===========================
-        Enclosure enclosure = new Enclosure(fieldsMap);
+        Enclosure enclosure = new Enclosure(fieldsMap, tickSystem);
 
         // =========================== Delivery ===========================
         Delivery delivery = new Delivery(enclosure, tickSystem, fields, deliveryProbability);
@@ -99,8 +99,8 @@ public class FarmSimulation {
         List<Thread> farmerThreads = new ArrayList<>();
         for (int i=1; i <= numFarmers; i++) {
             int randomBreakInterval = lowerBoundBreakInterval + rand.nextInt(breakRange);
-            Farmer singleFarmer = new Farmer("Farmer-"+i, enclosure, fieldsMap, tickSystem, breakDuration, randomBreakInterval);
-            Thread farmerThread = new Thread(singleFarmer, "Farmer-"+i);
+            Farmer singleFarmer = new Farmer("Farmer("+i+")", enclosure, fieldsMap, tickSystem, breakDuration, randomBreakInterval);
+            Thread farmerThread = new Thread(singleFarmer, "Farmer("+i+")");
             farmerThreads.add(farmerThread);
             farmerThread.start();
         }
@@ -109,8 +109,8 @@ public class FarmSimulation {
         List<Thread> buyerThreads = new ArrayList<>();
 
         for (int i = 1; i <= numBuyers; i++) {
-            Buyer buyer = new Buyer("Buyer-" + i, fieldsMap, tickSystem); // Each buyer gets a unique ID
-            Thread buyerThread = new Thread(buyer, "Buyer-" + i);
+            Buyer buyer = new Buyer("Buyer(" + i +")", fieldsMap, tickSystem); // Each buyer gets a unique ID
+            Thread buyerThread = new Thread(buyer, "Buyer(" + i+")");
             buyerThreads.add(buyerThread);
             buyerThread.start(); // Start the buyer thread
         }
@@ -183,7 +183,7 @@ public class FarmSimulation {
         }
     }
 
-    private static float getDoubleProperty(Properties props, String key, float defaultValue) {
+    private static double getDoubleProperty(Properties props, String key, double defaultValue) {
         // If key not present or invalid, return default
         String val = props.getProperty(key);
         if (val == null) {

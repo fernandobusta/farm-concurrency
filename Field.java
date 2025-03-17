@@ -15,6 +15,9 @@ public class Field {
 
     private final AtomicInteger buyersWaiting = new AtomicInteger(0);
 
+    public static final String ANSI_RESET = "\u001B[0m"; 
+    public static final String ANSI_GREEN = "\u001B[32m";
+
     public Field(String name, int initialAnimalCount, TickSystem tickSystem, int capacity) {
 
         this.name = name;
@@ -53,16 +56,15 @@ public class Field {
         lock.lock();
         try {
             while (count == 0){
-                System.out.println("⏳ " + buyerName + " is waiting for " + name + " to be stocked...");
+                System.out.println("     "+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + buyerName + " is waiting for " + name + " to be stocked...");
                 addBuyerToQueue();
                 notEmpty.await(); // Wait until some animals are available
             }
             count--;
 
             int waitedTicks = tickSystem.getCurrentTick() - tickItGotIntoQueue;
-            System.out.println("🛒 " + tickSystem.getCurrentTick() + " | " + buyerName + " collected 1: " + name + " from field after waiting " + waitedTicks + " ticks." + "(Remaining " + name + ":" + count + ")");
+            System.out.println("     "+ANSI_GREEN+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + buyerName + " collected 1: " + name + " from field after waiting " + waitedTicks + " ticks." + "(Remaining " + name + ":" + count + ")"+ANSI_RESET);
 
-            System.out.println("Tick" + tickSystem.getCurrentTick() + " 🛒 " + buyerName + " bought 1 " + name + " (Remaining: " + count + ")");
             removeBuyerFromQueue();
             tickSystem.waitForNTicks(1); // Buyer waits for 1 tick after buying
 

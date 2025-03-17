@@ -11,6 +11,8 @@ public class Buyer implements Runnable {
     private int tickItGotIntoQueue = -1;
 
 
+    
+
     public Buyer(String buyerName, Map<String, Field> fields, TickSystem tickSystem) {
         this.buyerName = buyerName;
         this.fields = fields;
