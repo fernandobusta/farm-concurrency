@@ -40,21 +40,17 @@ public class Farmer implements Runnable {
 
                 // Calculate available space in the trailer
                 int currentLoad = totalAnimalsInTrailer();
-                System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " has " + currentLoad + " animals in the trailer" + ANSI_RESET);
                 int availableSpace = maxCapacity - currentLoad;
 
                 // Load only if there is space left
                 if (availableSpace > 0 ) {
-                    System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " is loading animals into the trailer" + ANSI_RESET);
                     trailer = enclosure.loadAnimalsIntoTrailer(trailer, availableSpace, farmerName);
                 }
 
-                System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " received: " + trailer + ANSI_RESET);
 
                 goToFieldAndStock(); // Move and stock all animals
 
                 travelBackToEnclosure(totalAnimalsInTrailer()); // Return to the enclosure
-                System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " returned to the enclosure" + ANSI_RESET);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -71,9 +67,9 @@ public class Farmer implements Runnable {
     }
 
     private void takeABreak() throws InterruptedException {
-            System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " is taking a break" + ANSI_RESET);
+            System.out.println("     " + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + farmerName + " is taking a break");
             tickSystem.waitForNTicks(breakDuration);
-            System.out.println(ANSI_YELLOW + "🚜 " + farmerName + " finished break" + ANSI_RESET);
+            System.out.println("     " + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + farmerName + " finished break");
     }
 
 
@@ -100,11 +96,10 @@ public class Farmer implements Runnable {
             int totalAnimalsLeft = totalAnimalsInTrailer();
             travelToField(animal, totalAnimalsLeft);
             
-            System.out.println(ANSI_YELLOW  + "🚜 " + farmerName + " arrived at " + animal + " (count " + quantity + ")" + ANSI_RESET);
+            System.out.println("     "  + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + farmerName + " arrived at " + animal + "field (" + animal + " in trailer: " + quantity + ")");
             
             // Place the animals into the field
             int actuallyStocked = stockAnimalsInField(field, quantity);
-            System.out.println(ANSI_YELLOW + "✅ " + farmerName + " stocked " + actuallyStocked + " " + field.getName() + ANSI_RESET);
             
             int leftToStock = quantity - actuallyStocked;
 
@@ -125,8 +120,8 @@ public class Farmer implements Runnable {
             int fieldCapacity = field.getCapacity();
             int currentCount = field.getCount();
             while (currentCount == fieldCapacity) {
-                System.out.println("⏳ Field is full. Waiting for buyers to buy...");
-                System.out.println("count: " + currentCount + " capacity: " + fieldCapacity);
+                System.out.println("     "+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + "Field is full. Waiting for buyers to buy...");
+                System.out.println("     "+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + "count in trailer: " + currentCount + " capacity of field: " + fieldCapacity);
                 return 0;
             }
             // If partial stocking is necessary
@@ -134,7 +129,7 @@ public class Farmer implements Runnable {
             int added = Math.min(spaceLeft, quantity);
             field.setCount(currentCount + added);
 
-            System.out.println("🌾 Adding " + added + " to " + field.getName() + "field");
+            System.out.println("     "+ANSI_YELLOW+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + farmerName +" Adding " + added + " to " + field.getName() + "field"+ ANSI_RESET);
             for (int i=0; i<added; i++) {
                 tickSystem.waitForNextTick();
                 int currentTick = tickSystem.getCurrentTick();
@@ -142,7 +137,7 @@ public class Farmer implements Runnable {
                     willNeedBreakAfter = true;
                 }
             }
-            System.out.println("🌾 " + field.getName() + " stocked. Count =  " + field.getCount());
+            System.out.println("     "+ANSI_YELLOW+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " +  farmerName + " " + field.getName() + " stocked. Count in field =  " + field.getCount()+ANSI_RESET);
             // Signal that the field is not empty anymore (buyers can proceed)
             field.signalAllNotEmpty();
 
@@ -159,8 +154,8 @@ public class Farmer implements Runnable {
     private void travelToField(String field, int numberOfAnimalsCarried) throws InterruptedException {
         int travelTime = 10 + numberOfAnimalsCarried; // 10 ticks + 1 per animal carried
     
-        System.out.println(ANSI_YELLOW + "🚜 " + farmerName +  " carrying " 
-            + numberOfAnimalsCarried + " animals " + " (Travel Time: " + travelTime + " ticks)" + ANSI_RESET);
+        System.out.println("     " + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + farmerName +  " carrying " 
+            + numberOfAnimalsCarried + " animals " + " (Travel Time: " + travelTime + " ticks)");
     
         // Simulate travel time by waiting for each tick
         for (int i = 0; i < travelTime; i++) {
@@ -179,7 +174,7 @@ public class Farmer implements Runnable {
         }
 
         tickSystem.waitForNTicks(travelTime);
-        System.out.println(ANSI_YELLOW  + "🚜 " + farmerName + " traveled back to enclosure" + ANSI_RESET);
+        System.out.println("     "  + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " + farmerName + " traveled back to enclosure");
     }
 
     private int totalAnimalsInTrailer() {

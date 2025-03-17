@@ -33,7 +33,7 @@ public class TickSystem {
 
     private synchronized void nextTick() {
         currentTick = (currentTick + 1) % totalTicks; // Reset to 0 after a full day
-        System.out.println("⏳ Tick " + currentTick);
+        System.out.println( currentTick +" ⏳");
         notifyAll(); // Wake up all waiting threads
     }
 

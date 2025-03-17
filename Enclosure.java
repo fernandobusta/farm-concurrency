@@ -11,9 +11,14 @@ public class Enclosure {
     
     // Condition used to signal farmers that animals are now available
     private final Condition notEmpty = lock.newCondition();
+    private final TickSystem tickSystem;
+    public static final String ANSI_RESET = "\u001B[0m"; 
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[36m";
 
-    public Enclosure(Map<String, Field> fields) {
+    public Enclosure(Map<String, Field> fields, TickSystem tickSystem) {
         this.fields = fields;
+        this.tickSystem = tickSystem; 
     }
 
     private boolean hasNoAnimals() {
@@ -29,7 +34,7 @@ public class Enclosure {
                 int count = entry.getValue();
                 animals.put(type, animals.getOrDefault(type, 0) + count);
             }
-            System.out.println("✅ Enclosure updated: " + animals);
+            System.out.println("     "+ANSI_BLUE+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " Deposit of animals from delivery : " + animals+ANSI_RESET);
             // Signal that enclosure is no longer empty
             notEmpty.signalAll();
         } finally {
@@ -37,19 +42,18 @@ public class Enclosure {
         }
     }
 
-    // Farmer loads animals into their trailer (up to capacity
+// Farmer loads animals into their trailer
 public Map<String, Integer> loadAnimalsIntoTrailer(Map<String, Integer> existingTrailer, int capacity, String farmerName) throws InterruptedException {
     lock.lock();
     try {
-        System.out.println("🚜 " + farmerName + " has arrived at enclosure with capacity of: " + capacity);
-        System.out.println("🏠 Enclosure has: " + animals);
+        System.out.println("     "  + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " "  + farmerName + " has arrived at enclosure with capacity of: " + capacity);
+        System.out.println("     "+tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " "  + "Enclosure has: " + animals);
 
         while (hasNoAnimals()) {
-            System.out.println("⏳ Farmer " + farmerName + " is waiting for animals...");
+            System.out.println("     " + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " "  +  "Farmer " + farmerName + " is waiting for animals...");
             notEmpty.await();
         }
 
-        System.out.println("🚜 " + farmerName + " is loading animals into the trailer and has lock");
 
         // Convert enclosure animals into a list and sort based on priority
         List<Map.Entry<String, Integer>> sortedAnimals = new ArrayList<>(animals.entrySet());
@@ -74,7 +78,6 @@ public Map<String, Integer> loadAnimalsIntoTrailer(Map<String, Integer> existing
             Map.Entry<String, Integer> firstChoice = sortedAnimals.get(0);
             int numToTake = Math.min(4, Math.min(spaceLeft, firstChoice.getValue()));
             loadedAnimals.put(firstChoice.getKey(), numToTake);
-            System.out.println("🚜 " + farmerName + " is taking first " + numToTake + " " + firstChoice.getKey());
             animals.put(firstChoice.getKey(), animals.get(firstChoice.getKey()) - numToTake);
             spaceLeft -= numToTake;
             sortedAnimals.remove(firstChoice);
@@ -85,7 +88,6 @@ public Map<String, Integer> loadAnimalsIntoTrailer(Map<String, Integer> existing
             Map.Entry<String, Integer> secondChoice = sortedAnimals.get(0);
             int numToTake = Math.min(3, Math.min(spaceLeft, secondChoice.getValue()));
             loadedAnimals.put(secondChoice.getKey(), numToTake);
-            System.out.println("🚜 " + farmerName + " is taking second " + numToTake + " " + secondChoice.getKey());
             animals.put(secondChoice.getKey(), animals.get(secondChoice.getKey()) - numToTake);
             spaceLeft -= numToTake;
             sortedAnimals.remove(secondChoice);
@@ -100,7 +102,6 @@ public Map<String, Integer> loadAnimalsIntoTrailer(Map<String, Integer> existing
             
             if (available > 0) { // Only take if there are animals left
                 int numToTake = Math.min(spaceLeft, available); // Take up to the remaining space
-                System.out.println("🚜 " + farmerName + " is taking last " + numToTake + " " + type);
 
                 loadedAnimals.put(type, loadedAnimals.getOrDefault(type, 0) + numToTake);
                 animals.put(type, available - numToTake); // Subtract from enclosure
@@ -114,7 +115,7 @@ public Map<String, Integer> loadAnimalsIntoTrailer(Map<String, Integer> existing
         }
 
 
-        System.out.println("🚜 " + farmerName + " received: " + loadedAnimals);
+        System.out.println("     "+ANSI_YELLOW + tickSystem.getCurrentTick() + " " + Thread.currentThread().getId() + " " +  farmerName + " collected_animals : " + loadedAnimals+ANSI_RESET);
         return loadedAnimals;
     } finally {
         lock.unlock();
